@@ -1,0 +1,1 @@
+ildasm Interop.PortableDeviceApiLib.dll /out:pdapi.il

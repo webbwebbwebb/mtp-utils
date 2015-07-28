@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using PortableDeviceApiLib;
 using PortableDeviceConstants;
@@ -11,12 +12,11 @@ namespace ConsoleApplication1
 {
     public class DeviceFileStructure
     {
-        private readonly IPortableDeviceContent _deviceContent;
+        private IPortableDeviceContent _deviceContent;
 
         public DeviceFileStructure(ref IPortableDeviceContent deviceContent)
         {
             _deviceContent = deviceContent;
-            Root = Enumerate(ref deviceContent, "DEVICE", null) as DeviceFolder;
         }
 
         public DeviceFolder Root { get; private set; }
@@ -25,6 +25,10 @@ namespace ConsoleApplication1
         {
             // traverse down folder structure until we can't match any further
             string[] pathLevels = folderPath.Split(Path.DirectorySeparatorChar);
+            if (Root == null)
+            {
+                Root = (DeviceFolder)Enumerate(ref _deviceContent, pathLevels, "DEVICE", null);
+            }
             DeviceFolder deepestMatch = Root.FindDeepestMatch(pathLevels);
 
             var currentFolder = deepestMatch;
@@ -36,37 +40,6 @@ namespace ConsoleApplication1
             }
             
             return currentFolder;
-        }
-
-        public DeviceFolder CreateNewFolder(string folderName, DeviceFolder parentFolder)
-        {
-            IPortableDeviceProperties properties;
-            _deviceContent.Properties(out properties);
-
-            if (parentFolder == null)
-            {
-                throw new ArgumentException("Cannot create folder at root level.");
-            }
-
-            var createFolderValues = new PortableDeviceValues() as IPortableDeviceValues;
-            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_PARENT_ID, parentFolder.Id);
-            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_NAME, folderName);
-            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_ORIGINAL_FILE_NAME, folderName);
-            createFolderValues.SetGuidValue(PortableDevicePKeys.WPD_OBJECT_CONTENT_TYPE, PortableDeviceGuids.WPD_CONTENT_TYPE_FOLDER);
-            createFolderValues.SetGuidValue(PortableDevicePKeys.WPD_OBJECT_FORMAT, PortableDeviceGuids.WPD_OBJECT_FORMAT_PROPERTIES_ONLY);
-
-            string newFolderId = "";
-            _deviceContent.CreateObjectWithPropertiesOnly(createFolderValues, ref newFolderId);
-
-            var newFolder = new DeviceFolder
-            {
-                Id = newFolderId,
-                Name = folderName,
-                Parent = parentFolder
-            };
-            parentFolder.AddChild(newFolder);
-
-            return newFolder;
         }
 
         public void Copy(FileInfo file, DeviceFolder destinationFolder)
@@ -101,14 +74,45 @@ namespace ConsoleApplication1
             }
         }
 
-        private static DeviceFileObject Enumerate(ref IPortableDeviceContent deviceContent, string currentObjectId, DeviceFolder parent)
+        private DeviceFolder CreateNewFolder(string folderName, DeviceFolder parentFolder)
+        {
+            IPortableDeviceProperties properties;
+            _deviceContent.Properties(out properties);
+
+            if (parentFolder == null)
+            {
+                throw new ArgumentException("Cannot create folder at root level.");
+            }
+
+            var createFolderValues = new PortableDeviceValues() as IPortableDeviceValues;
+            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_PARENT_ID, parentFolder.Id);
+            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_NAME, folderName);
+            createFolderValues.SetStringValue(PortableDevicePKeys.WPD_OBJECT_ORIGINAL_FILE_NAME, folderName);
+            createFolderValues.SetGuidValue(PortableDevicePKeys.WPD_OBJECT_CONTENT_TYPE, PortableDeviceGuids.WPD_CONTENT_TYPE_FOLDER);
+            createFolderValues.SetGuidValue(PortableDevicePKeys.WPD_OBJECT_FORMAT, PortableDeviceGuids.WPD_OBJECT_FORMAT_PROPERTIES_ONLY);
+
+            string newFolderId = "";
+            _deviceContent.CreateObjectWithPropertiesOnly(createFolderValues, ref newFolderId);
+
+            var newFolder = new DeviceFolder
+            {
+                Id = newFolderId,
+                Name = folderName,
+                Parent = parentFolder
+            };
+            parentFolder.AddChild(newFolder);
+
+            return newFolder;
+        }
+
+        private static DeviceFileObject Enumerate(ref IPortableDeviceContent deviceContent, string[] pathLevels, string currentObjectId, DeviceFolder parent)
         {
             IPortableDeviceProperties properties;
             deviceContent.Properties(out properties);
 
             var currentFileObject = DeviceFileObject.FromObjectId(currentObjectId, properties, parent);
 
-            if (currentFileObject is DeviceFolder)
+            if (currentFileObject is DeviceFolder && pathLevels.Length > 0 && pathLevels[0].ToUpper() == currentFileObject.Name.ToUpper())
             {
                 var currentFolder = currentFileObject as DeviceFolder;
                 IEnumPortableDeviceObjectIDs pEnum;
@@ -122,7 +126,7 @@ namespace ConsoleApplication1
 
                     if (fetched > 0)
                     {
-                        currentFolder.AddChild(Enumerate(ref deviceContent, childObjectId, currentFolder));
+                        currentFolder.AddChild(Enumerate(ref deviceContent, pathLevels.Skip(1).ToArray(), childObjectId, currentFolder));
                     }
                 } while (fetched > 0);
             }

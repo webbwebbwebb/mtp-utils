@@ -1,12 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using PortableDeviceApiLib;
 using PortableDeviceConstants;
 using PortableDeviceTypesLib;
 using IPortableDeviceValues = PortableDeviceApiLib.IPortableDeviceValues;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public class Device
     {

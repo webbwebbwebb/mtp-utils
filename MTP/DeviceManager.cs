@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PortableDeviceApiLib;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public class DeviceManager : IDeviceManager
     {

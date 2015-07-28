@@ -5,10 +5,9 @@ using System.Runtime.InteropServices;
 using PortableDeviceApiLib;
 using PortableDeviceConstants;
 using PortableDeviceTypesLib;
-
 using IPortableDeviceValues = PortableDeviceApiLib.IPortableDeviceValues;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public class DeviceFileStructure
     {

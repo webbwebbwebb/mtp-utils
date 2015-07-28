@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using NUnit.Framework;
 
-namespace ConsoleApplication1.Tests
+namespace Mtp.Tests
 {
     [TestFixture]
     public class StringExtensionsTests

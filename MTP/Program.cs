@@ -1,7 +1,7 @@
 ﻿using System;
 using PortableDeviceApiLib;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public class Program
     {

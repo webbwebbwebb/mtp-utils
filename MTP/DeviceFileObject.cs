@@ -5,7 +5,7 @@ using System.Linq;
 using PortableDeviceApiLib;
 using PortableDeviceConstants;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public abstract class DeviceFileObject
     {

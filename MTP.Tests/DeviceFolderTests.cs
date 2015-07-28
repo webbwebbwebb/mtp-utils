@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace ConsoleApplication1.Tests
+namespace Mtp.Tests
 {
     [TestFixture]
     public class DeviceFolderTests

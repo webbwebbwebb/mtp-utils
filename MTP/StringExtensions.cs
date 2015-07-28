@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public static class StringExtensions
     {

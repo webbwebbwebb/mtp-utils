@@ -1,8 +1,7 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ConsoleApplication1
+namespace Mtp
 {
     public static class UnsignedShortArrayExtensions
     {

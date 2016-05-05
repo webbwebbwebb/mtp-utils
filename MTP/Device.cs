@@ -9,12 +9,12 @@ namespace Mtp
 {
     public class Device
     {
-        private readonly PortableDeviceClass _portableDeviceClass;
+        private readonly IPortableDevice _portableDeviceClass;
 
         public string Id { get; set; }
         public string Name { get; set; }
 
-        public Device(PortableDeviceClass portableDeviceClass)
+        public Device(IPortableDevice portableDeviceClass)
         {
             _portableDeviceClass = portableDeviceClass;
         }
